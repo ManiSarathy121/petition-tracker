@@ -7,6 +7,7 @@ import { useIsAdmin } from "@/components/ProfileContext";
 import { useMasterData } from "@/lib/useMasterData";
 import { PRIORITIES, STATUSES } from "@/lib/types";
 import type { DictKey } from "@/i18n/dict";
+import { TamilInput } from "@/components/TamilInput";
 const empty = {
   proceedings_no: "",
   received_date: new Date().toISOString().slice(0, 10),
@@ -127,11 +128,15 @@ export default function NewPetitionPage() {
             value={form.received_date}
             onChange={(v) => set("received_date", v)}
           />
-          <Input
-            k="writerName"
-            value={form.writer_name}
-            onChange={(v) => set("writer_name", v)}
-          />
+          <div>
+            <label className="label">
+              <L k="writerName" />
+            </label>
+            <TamilInput
+              value={form.writer_name}
+              onChange={(v) => set("writer_name", v)}
+            />
+          </div>
           <Input
             k="outwardNo"
             value={form.outward_no}
@@ -150,11 +155,14 @@ export default function NewPetitionPage() {
             onChange={(v) => set("next_action_date", v)}
           />
           <div className="sm:col-span-2 lg:col-span-3">
-            <Input
-              k="subject"
+            <label className="label">
+              <L k="subject" /> <span className="text-rose-600">*</span>
+            </label>
+            <TamilInput
               required
               value={form.subject}
               onChange={(v) => set("subject", v)}
+              placeholder="e.g. Ocheri Road Repair Petition / ஓச்சரி சாலை சீரமைப்பு மனு"
             />
           </div>
           <div className="sm:col-span-2 lg:col-span-3">
@@ -180,28 +188,42 @@ export default function NewPetitionPage() {
           <L k="petitionerDetails" />
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Input
-            k="petitionerName"
-            required
-            value={form.petitioner_name}
-            onChange={(v) => set("petitioner_name", v)}
-          />
-          <Input
-            k="petitionerFather"
-            value={form.petitioner_father}
-            onChange={(v) => set("petitioner_father", v)}
-          />
+          <div>
+            <label className="label">
+              <L k="petitionerName" /> <span className="text-rose-600">*</span>
+            </label>
+            <TamilInput
+              required
+              value={form.petitioner_name}
+              onChange={(v) => set("petitioner_name", v)}
+              placeholder="e.g. Mani / மணி"
+            />
+          </div>
+          <div>
+            <label className="label">
+              <L k="petitionerFather" />
+            </label>
+            <TamilInput
+              value={form.petitioner_father}
+              onChange={(v) => set("petitioner_father", v)}
+              placeholder="e.g. Sarathy / சாரதி"
+            />
+          </div>
           <Input
             k="petitionerPhone"
             value={form.petitioner_phone}
             onChange={(v) => set("petitioner_phone", v)}
           />
           <div className="sm:col-span-2 lg:col-span-3">
-            <Textarea
-              k="petitionerAddress"
+            <label className="label">
+              <L k="petitionerAddress" />
+            </label>
+            <TamilInput
+              isTextArea
               rows={2}
               value={form.petitioner_address}
               onChange={(v) => set("petitioner_address", v)}
+              placeholder="e.g. Ocheri Village, Nemili Taluk..."
             />
           </div>
         </div>

@@ -1,7 +1,30 @@
 export type Role = "admin" | "officer";
 
 export type PetitionStatus =
-  "new" | "assigned" | "in_progress" | "resolved" | "rejected";
+  | "new"
+  | "assigned"
+  | "in_progress"
+  | "resolved"
+  | "rejected"
+  | "closed";
+
+export const STATUSES: PetitionStatus[] = [
+  "new",
+  "assigned",
+  "in_progress",
+  "resolved",
+  "closed",
+  "rejected",
+];
+
+export const STATUS_STYLES: Record<PetitionStatus, string> = {
+  new: "bg-sky-100 text-sky-800 ring-sky-600/20",
+  assigned: "bg-violet-100 text-violet-800 ring-violet-600/20",
+  in_progress: "bg-amber-100 text-amber-800 ring-amber-600/20",
+  resolved: "bg-emerald-100 text-emerald-800 ring-emerald-600/20",
+  closed: "bg-slate-200 text-slate-800 ring-slate-600/20",
+  rejected: "bg-rose-100 text-rose-800 ring-rose-600/20",
+};
 
 export type Priority = "low" | "normal" | "high" | "urgent";
 
@@ -114,23 +137,7 @@ export interface Attachment {
   uploaded_at: string;
 }
 
-export const STATUSES: PetitionStatus[] = [
-  "new",
-  "assigned",
-  "in_progress",
-  "resolved",
-  "rejected",
-];
-
 export const PRIORITIES: Priority[] = ["low", "normal", "high", "urgent"];
-
-export const STATUS_STYLES: Record<PetitionStatus, string> = {
-  new: "bg-sky-100 text-sky-800 ring-sky-600/20",
-  assigned: "bg-violet-100 text-violet-800 ring-violet-600/20",
-  in_progress: "bg-amber-100 text-amber-800 ring-amber-600/20",
-  resolved: "bg-emerald-100 text-emerald-800 ring-emerald-600/20",
-  rejected: "bg-rose-100 text-rose-800 ring-rose-600/20",
-};
 
 export const PRIORITY_STYLES: Record<Priority, string> = {
   low: "bg-slate-100 text-slate-700 ring-slate-500/20",

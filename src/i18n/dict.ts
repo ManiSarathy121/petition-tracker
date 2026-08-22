@@ -45,6 +45,7 @@ export const dict = {
   status_assigned: { en: "Assigned", ta: "ஒதுக்கப்பட்டது" },
   status_in_progress: { en: "In progress", ta: "நடவடிக்கையில்" },
   status_resolved: { en: "Resolved", ta: "தீர்க்கப்பட்டது" },
+  status_closed: { en: "Closed", ta: "முடிவுற்றது" },
   status_rejected: { en: "Rejected", ta: "நிராகரிக்கப்பட்டது" },
 
   priority: { en: "Priority", ta: "முன்னுரிமை" },
@@ -174,6 +175,24 @@ export const dict = {
     ta: "மாவட்டங்கள்/வட்டங்கள்/கிராமங்கள் வெற்றிகரமாக பதிவேற்றப்பட்டன!",
   },
   importing: { en: "Importing records...", ta: "பதிவேற்றப்படுகிறது..." },
+  pendingAgingChart: {
+    en: "Pending Petitions Aging Analysis",
+    ta: "நிலுவை மனுக்கள் கால பகுப்பாய்வு",
+  },
+  under15Days: { en: "Under 15 Days", ta: "15 நாட்களுக்குள்" },
+  days15To30: { en: "15 – 30 Days", ta: "15 – 30 நாட்கள்" },
+  over30Days: { en: "More than 30 Days", ta: "30 நாட்களுக்கு மேல்" },
+  exportExcel: { en: "Export to Excel", ta: "Excel பதிவிறக்கு" },
+  exportPDF: { en: "Print / Export PDF Dashboard", ta: "PDF அறிக்கை அச்சிடு" },
+  leaderboard: { en: "Officer Performance Leaderboard", ta: "அலுவலர் செயல்பாட்டு தரவரிசை" },
+  officer: { en: "Officer", ta: "அலுவலர்" },
+  resolvedRate: { en: "Resolution Rate", ta: "தீர்வு சதவீதம்" },
+  avgResolutionSpeed: { en: "Avg Speed (Days)", ta: "சராசரி வேகம் (நாட்கள்)" },
+  tamilAssistant: { en: "Tamil Transliteration Assistant", ta: "தமிழ் எழுத்தாக்க உதவி" },
+  typeInEnglishToTranslate: {
+    en: "Type in English phonetics (e.g. Ocheri, Nemili) to convert to Tamil",
+    ta: "ஆங்கிலத்தில் தட்டச்சு செய்து தமிழில் மாற்றவும் (எ.கா. Ocheri -> ஓச்சரி, Nemili -> நெமிலி)",
+  },
 } as const;
 
 export type DictKey = keyof typeof dict;

@@ -16,6 +16,7 @@ export default function PetitionsPage() {
     </Suspense>
   );
 }
+
 function PetitionsList() {
   const { t, lang } = useLang();
   const name = useName();
@@ -24,6 +25,7 @@ function PetitionsList() {
   const master = useMasterData();
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<string>(params.get("status") ?? "");
+  const [agingParam, setAgingParam] = useState<string>(params.get("aging") ?? "");
   const [dept, setDept] = useState("");
   const [district, setDistrict] = useState("");
   const [taluk, setTaluk] = useState("");
@@ -35,6 +37,7 @@ function PetitionsList() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const PAGE = 25;
+
   const run = useCallback(async () => {
     setLoading(true);
     const supabase = createClient();
@@ -47,20 +50,54 @@ function PetitionsList() {
       p_village: village || null,
       p_from: from || null,
       p_to: to || null,
-      p_limit: PAGE,
+      p_limit: 100, // fetch larger set for client aging filtering
       p_offset: page * PAGE,
     });
     if (error) console.error(error);
-    setRows((data as Petition[]) ?? []);
+
+    let petitionsList = (data as Petition[]) ?? [];
+    const now = new Date();
+
+    // Auto closure status calculation: Resolved > 10 days -> Closed
+    petitionsList = petitionsList.map((p) => {
+      if (p.status === "resolved") {
+        const resolvedDateStr = p.action_taken_date || p.updated_at;
+        if (resolvedDateStr) {
+          const diffDays = Math.floor((now.getTime() - new Date(resolvedDateStr).getTime()) / (1000 * 3600 * 24));
+          if (diffDays > 10) {
+            return { ...p, status: "closed" as PetitionStatus };
+          }
+        }
+      }
+      return p;
+    });
+
+    // Aging filter
+    if (agingParam) {
+      petitionsList = petitionsList.filter((p) => {
+        if (!["new", "assigned", "in_progress"].includes(p.status)) return false;
+        const recDate = new Date(p.received_date);
+        const ageDays = Math.floor((now.getTime() - recDate.getTime()) / (1000 * 3600 * 24));
+        if (agingParam === "15") return ageDays < 15;
+        if (agingParam === "30") return ageDays >= 15 && ageDays <= 30;
+        if (agingParam === "30+") return ageDays > 30;
+        return true;
+      });
+    }
+
+    setRows(petitionsList);
     setLoading(false);
-  }, [q, status, dept, district, taluk, village, from, to, page]);
+  }, [q, status, agingParam, dept, district, taluk, village, from, to, page]);
+
   useEffect(() => {
     const id = setTimeout(run, 250);
     return () => clearTimeout(id);
   }, [run]);
+
   const clearAll = () => {
     setQ("");
     setStatus("");
+    setAgingParam("");
     setDept("");
     setDistrict("");
     setTaluk("");
@@ -69,6 +106,51 @@ function PetitionsList() {
     setTo("");
     setPage(0);
   };
+
+  const exportToExcel = () => {
+    if (rows.length === 0) return;
+    const headers = [
+      "Petition No",
+      "Serial No",
+      "Petitioner Name",
+      "Phone",
+      "Subject",
+      "Status",
+      "Received Date",
+      "Next Action Date",
+      "Proceedings No",
+      "Outward No",
+      "Remarks"
+    ];
+
+    const csvRows = [headers.join(",")];
+    rows.forEach((p) => {
+      const row = [
+        `"${p.petition_no || ""}"`,
+        `"${p.serial_no || ""}"`,
+        `"${(p.petitioner_name || "").replace(/"/g, '""')}"`,
+        `"${p.petitioner_phone || ""}"`,
+        `"${(p.subject || "").replace(/"/g, '""')}"`,
+        `"${p.status}"`,
+        `"${p.received_date}"`,
+        `"${p.next_action_date || ""}"`,
+        `"${p.proceedings_no || ""}"`,
+        `"${p.outward_no || ""}"`,
+        `"${(p.register_remarks || "").replace(/"/g, '""')}"`
+      ];
+      csvRows.push(row.join(","));
+    });
+
+    const blob = new Blob([csvRows.join("\n")], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `petitions_export_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const talukOptions = district
     ? master.taluks.filter((x) => x.district_id === district)
     : master.taluks;
@@ -77,6 +159,7 @@ function PetitionsList() {
     : master.villages;
   const activeFilters = [
     status,
+    agingParam,
     dept,
     district,
     taluk,
@@ -84,17 +167,37 @@ function PetitionsList() {
     from,
     to,
   ].filter(Boolean).length;
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
-          {t("petitions")}
-        </h1>
-        {isAdmin && (
-          <Link href="/petitions/new" className="btn-primary">
-            + {t("newPetition")}
-          </Link>
-        )}
+        <div>
+          <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
+            {t("petitions")}
+          </h1>
+          {agingParam && (
+            <p className="text-xs text-primary-700 font-medium mt-0.5">
+              Aging Filter: {agingParam === "15" ? t("under15Days") : agingParam === "30" ? t("days15To30") : t("over30Days")}
+            </p>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button
+            onClick={exportToExcel}
+            className="btn-secondary text-xs flex items-center gap-1.5"
+            disabled={rows.length === 0}
+          >
+            <span>📊</span>
+            <span>{t("exportExcel")}</span>
+          </button>
+
+          {isAdmin && (
+            <Link href="/petitions/new" className="btn-primary text-xs">
+              + {t("newPetition")}
+            </Link>
+          )}
+        </div>
       </div>
       <div className="card p-4 space-y-3">
         <div className="flex gap-2">
