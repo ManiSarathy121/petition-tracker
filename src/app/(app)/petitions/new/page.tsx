@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { L, useLang, useName } from "@/components/Lang";
@@ -8,6 +8,8 @@ import { useMasterData } from "@/lib/useMasterData";
 import { PRIORITIES, STATUSES } from "@/lib/types";
 import type { DictKey } from "@/i18n/dict";
 import { TamilInput } from "@/components/TamilInput";
+import { useDefaultDistrict } from "@/components/DistrictContext";
+
 const empty = {
   proceedings_no: "",
   received_date: new Date().toISOString().slice(0, 10),
@@ -30,16 +32,26 @@ const empty = {
   priority: "normal",
   status: "new",
 };
+
 export default function NewPetitionPage() {
   const router = useRouter();
   const { t, lang } = useLang();
   const name = useName();
   const isAdmin = useIsAdmin();
   const master = useMasterData();
-  const [form, setForm] = useState({ ...empty });
+  const { defaultDistrictId } = useDefaultDistrict();
+
+  const [form, setForm] = useState({ ...empty, district_id: defaultDistrictId });
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Sync default district if form hasn't been touched yet
+  useEffect(() => {
+    if (!form.district_id && defaultDistrictId) {
+      setForm((f) => ({ ...f, district_id: defaultDistrictId }));
+    }
+  }, [defaultDistrictId, form.district_id]);
   if (!isAdmin) {
     return <p className="card p-6 text-sm text-slate-600">{t("adminOnly")}</p>;
   }
