@@ -9,6 +9,7 @@ import { PriorityBadge, StatusBadge } from "@/components/StatusBadge";
 import { useMasterData } from "@/lib/useMasterData";
 import { STATUSES, type Petition, type PetitionStatus } from "@/lib/types";
 import type { DictKey } from "@/i18n/dict";
+import { SearchableSelect } from "@/components/SearchableSelect";
 export default function PetitionsPage() {
   return (
     <Suspense fallback={null}>
@@ -253,77 +254,63 @@ function PetitionsList() {
                 ))}
               </select>
             </Field>
-            <Field label={t("department")}>
-              <select
-                className="input"
-                value={dept}
-                onChange={(e) => {
-                  setDept(e.target.value);
-                  setPage(0);
-                }}
-              >
-                <option value="">{t("all")}</option>
-                {master.departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {name(d)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={t("district")}>
-              <select
-                className="input"
-                value={district}
-                onChange={(e) => {
-                  setDistrict(e.target.value);
-                  setTaluk("");
-                  setVillage("");
-                  setPage(0);
-                }}
-              >
-                <option value="">{t("all")}</option>
-                {master.districts.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {name(d)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={t("taluk")}>
-              <select
-                className="input"
-                value={taluk}
-                onChange={(e) => {
-                  setTaluk(e.target.value);
-                  setVillage("");
-                  setPage(0);
-                }}
-              >
-                <option value="">{t("all")}</option>
-                {talukOptions.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {name(d)}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field label={t("village")}>
-              <select
-                className="input"
-                value={village}
-                onChange={(e) => {
-                  setVillage(e.target.value);
-                  setPage(0);
-                }}
-              >
-                <option value="">{t("all")}</option>
-                {villageOptions.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {name(d)}
-                  </option>
-                ))}
-              </select>
-            </Field>
+            <SearchableSelect
+              label={t("department")}
+              value={dept}
+              onChange={(v) => {
+                setDept(v);
+                setPage(0);
+              }}
+              options={master.departments.map((d) => ({
+                id: d.id,
+                label: name(d),
+                sub: d.code,
+              }))}
+              placeholder={t("all")}
+            />
+            <SearchableSelect
+              label={t("district")}
+              value={district}
+              onChange={(v) => {
+                setDistrict(v);
+                setTaluk("");
+                setVillage("");
+                setPage(0);
+              }}
+              options={master.districts.map((d) => ({
+                id: d.id,
+                label: name(d),
+                sub: d.code,
+              }))}
+              placeholder={t("all")}
+            />
+            <SearchableSelect
+              label={t("taluk")}
+              value={taluk}
+              onChange={(v) => {
+                setTaluk(v);
+                setVillage("");
+                setPage(0);
+              }}
+              options={talukOptions.map((d) => ({
+                id: d.id,
+                label: name(d),
+              }))}
+              placeholder={t("all")}
+            />
+            <SearchableSelect
+              label={t("village")}
+              value={village}
+              onChange={(v) => {
+                setVillage(v);
+                setPage(0);
+              }}
+              options={villageOptions.map((d) => ({
+                id: d.id,
+                label: name(d),
+              }))}
+              placeholder={t("all")}
+            />
             <Field label={`${t("receivedDate")} — ${t("from")}`}>
               <input
                 type="date"

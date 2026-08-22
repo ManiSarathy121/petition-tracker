@@ -10,6 +10,7 @@ import type { DictKey } from "@/i18n/dict";
 import { TamilInput } from "@/components/TamilInput";
 import { useDefaultDistrict } from "@/components/DistrictContext";
 import { PetitionScanner, type ExtractedPetitionData } from "@/components/PetitionScanner";
+import { SearchableSelect } from "@/components/SearchableSelect";
 
 const empty = {
   proceedings_no: "",
@@ -284,8 +285,8 @@ export default function NewPetitionPage() {
           <L k="locationDetails" />
         </h2>
         <div className="grid gap-4 sm:grid-cols-3">
-          <Select
-            k="district"
+          <SearchableSelect
+            label={t("district")}
             value={form.district_id}
             onChange={(v) => {
               set("district_id", v);
@@ -295,22 +296,26 @@ export default function NewPetitionPage() {
             options={master.districts.map((d) => ({
               id: d.id,
               label: name(d),
+              sub: d.code,
             }))}
+            placeholder="-- Select District --"
           />
-          <Select
-            k="taluk"
+          <SearchableSelect
+            label={t("taluk")}
             value={form.taluk_id}
             onChange={(v) => {
               set("taluk_id", v);
               set("village_id", "");
             }}
             options={talukOptions.map((d) => ({ id: d.id, label: name(d) }))}
+            placeholder="-- Select Taluk --"
           />
-          <Select
-            k="village"
+          <SearchableSelect
+            label={t("village")}
             value={form.village_id}
             onChange={(v) => set("village_id", v)}
             options={villageOptions.map((d) => ({ id: d.id, label: name(d) }))}
+            placeholder="-- Select Village --"
           />
         </div>
       </section>
@@ -319,8 +324,8 @@ export default function NewPetitionPage() {
           <L k="routingDetails" />
         </h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Select
-            k="department"
+          <SearchableSelect
+            label={t("department")}
             value={form.department_id}
             onChange={(v) => {
               set("department_id", v);
@@ -329,16 +334,19 @@ export default function NewPetitionPage() {
             options={master.departments.map((d) => ({
               id: d.id,
               label: name(d),
+              sub: d.code,
             }))}
+            placeholder="-- Select Department --"
           />
-          <Select
-            k="assignedTo"
+          <SearchableSelect
+            label={t("assignedTo")}
             value={form.assigned_to}
             onChange={(v) => set("assigned_to", v)}
             options={officerOptions.map((o) => ({
               id: o.id,
               label: `${o.full_name}${o.designation ? " · " + o.designation : ""}`,
             }))}
+            placeholder="-- Select Officer --"
           />
           <div>
             <label className="label">
