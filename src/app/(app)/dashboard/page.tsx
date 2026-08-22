@@ -193,63 +193,94 @@ export default function DashboardPage() {
         <Stat label={t("overdue")} value={overdue} tone="rose" icon="🚨" />
       </div>
 
-      {/* Status Breakdown Bar */}
-      <div className="card p-4 space-y-3">
-        <h2 className="section-title">{t("status")}</h2>
-        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
-          {STATUSES.map((s) => (
-            <Link
-              key={s}
-              href={`/petitions?status=${s}`}
-              className="rounded-md border border-slate-200 p-3 text-center transition-all hover:border-slate-300 hover:bg-slate-50 hover:shadow-sm"
-            >
-              <div className="text-xl font-semibold text-slate-900">
-                {counts[s] ?? 0}
-              </div>
-              <div className="mt-1 text-xs font-medium text-slate-600">
-                {t(`status_${s}` as DictKey)}
-              </div>
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Pending Aging Analysis & Leaderboard Grid */}
+      {/* Visual Donut Charts Section */}
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Pending Aging Chart */}
+        {/* Donut Chart 1: Status Distribution */}
         <div className="card p-4 space-y-4">
           <div className="flex items-center justify-between border-b border-slate-100 pb-2">
             <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
-              <span>⏱️</span>
+              <span>📊</span>
+              <span>{t("status")} Distribution Donut</span>
+            </h2>
+            <span className="text-xs text-slate-400 font-mono">({total} Total)</span>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-4 pt-2">
+            <StatusDonutChart counts={counts} total={total} />
+            
+            <div className="grid grid-cols-2 gap-2 text-xs w-full sm:w-auto">
+              {STATUSES.map((s) => (
+                <Link
+                  key={s}
+                  href={`/petitions?status=${s}`}
+                  className="flex items-center justify-between gap-2 p-1.5 rounded hover:bg-slate-50 border border-slate-100"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full ${
+                        s === "new" ? "bg-sky-500" :
+                        s === "assigned" ? "bg-violet-500" :
+                        s === "in_progress" ? "bg-amber-500" :
+                        s === "resolved" ? "bg-emerald-500" :
+                        s === "closed" ? "bg-slate-500" : "bg-rose-500"
+                      }`}
+                    />
+                    <span className="text-slate-700">{t(`status_${s}` as DictKey)}</span>
+                  </div>
+                  <span className="font-semibold text-slate-900">{counts[s] ?? 0}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Donut Chart 2: Pending Aging Analysis */}
+        <div className="card p-4 space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h2 className="text-sm font-semibold text-slate-800 flex items-center gap-2">
+              <span>🍩</span>
               <span>{t("pendingAgingChart")}</span>
             </h2>
             <span className="text-xs text-slate-400 font-mono">({open} Open)</span>
           </div>
 
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <Link
-              href="/petitions?aging=15"
-              className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 transition-transform hover:scale-105"
-            >
-              <div className="text-2xl font-bold text-emerald-700">{agingCounts.under15}</div>
-              <div className="mt-1 text-xs font-medium text-emerald-800">{t("under15Days")}</div>
-            </Link>
+          <div className="flex flex-col sm:flex-row items-center justify-around gap-4 pt-2">
+            <AgingDonutChart agingCounts={agingCounts} open={open} />
 
-            <Link
-              href="/petitions?aging=30"
-              className="rounded-lg bg-amber-50 border border-amber-200 p-3 transition-transform hover:scale-105"
-            >
-              <div className="text-2xl font-bold text-amber-700">{agingCounts.days15To30}</div>
-              <div className="mt-1 text-xs font-medium text-amber-800">{t("days15To30")}</div>
-            </Link>
+            <div className="space-y-2 text-xs w-full sm:w-auto">
+              <Link
+                href="/petitions?aging=15"
+                className="flex items-center justify-between gap-4 p-2 rounded-lg bg-emerald-50 border border-emerald-200 transition-transform hover:scale-102"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-emerald-500" />
+                  <span className="font-medium text-emerald-900">{t("under15Days")}</span>
+                </div>
+                <span className="font-bold text-emerald-800 text-sm">{agingCounts.under15}</span>
+              </Link>
 
-            <Link
-              href="/petitions?aging=30+"
-              className="rounded-lg bg-rose-50 border border-rose-200 p-3 transition-transform hover:scale-105"
-            >
-              <div className="text-2xl font-bold text-rose-700">{agingCounts.over30}</div>
-              <div className="mt-1 text-xs font-medium text-rose-800">{t("over30Days")}</div>
-            </Link>
+              <Link
+                href="/petitions?aging=30"
+                className="flex items-center justify-between gap-4 p-2 rounded-lg bg-amber-50 border border-amber-200 transition-transform hover:scale-102"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-amber-500" />
+                  <span className="font-medium text-amber-900">{t("days15To30")}</span>
+                </div>
+                <span className="font-bold text-amber-800 text-sm">{agingCounts.days15To30}</span>
+              </Link>
+
+              <Link
+                href="/petitions?aging=30+"
+                className="flex items-center justify-between gap-4 p-2 rounded-lg bg-rose-50 border border-rose-200 transition-transform hover:scale-102"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="h-3 w-3 rounded-full bg-rose-500" />
+                  <span className="font-medium text-rose-900">{t("over30Days")}</span>
+                </div>
+                <span className="font-bold text-rose-800 text-sm">{agingCounts.over30}</span>
+              </Link>
+            </div>
           </div>
 
           {/* Visual Progress Bar */}
@@ -410,6 +441,126 @@ function Stat({
         <span className="text-base">{icon}</span>
       </div>
       <div className="mt-2 text-3xl font-bold">{value}</div>
+    </div>
+  );
+}
+
+function StatusDonutChart({ counts, total }: { counts: Record<string, number>; total: number }) {
+  if (total === 0) {
+    return (
+      <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-8 border-slate-100 font-bold text-slate-400 text-xs">
+        0 Petitions
+      </div>
+    );
+  }
+
+  const colorMap: Record<string, string> = {
+    new: "#0284c7",       // sky-600
+    assigned: "#7c3aed",  // violet-600
+    in_progress: "#d97706",// amber-600
+    resolved: "#059669",  // emerald-600
+    closed: "#475569",    // slate-600
+    rejected: "#e11d48",  // rose-600
+  };
+
+  let cumulativePercent = 0;
+  const segments = STATUSES.map((s) => {
+    const count = counts[s] ?? 0;
+    const percent = (count / total) * 100;
+    const dashArray = `${percent} ${100 - percent}`;
+    const dashOffset = -cumulativePercent;
+    cumulativePercent += percent;
+    return { status: s, count, percent, dashArray, dashOffset, color: colorMap[s] };
+  }).filter((seg) => seg.count > 0);
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg className="h-36 w-36 -rotate-90 transform" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#e2e8f0" strokeWidth="6" />
+        {segments.map((seg) => (
+          <circle
+            key={seg.status}
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            stroke={seg.color}
+            strokeWidth="6"
+            strokeDasharray={seg.dashArray}
+            strokeDashoffset={seg.dashOffset}
+            className="transition-all duration-500 hover:opacity-80"
+          />
+        ))}
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-bold text-slate-900">{total}</span>
+        <span className="text-[10px] text-slate-500 font-medium">Petitions</span>
+      </div>
+    </div>
+  );
+}
+
+function AgingDonutChart({ agingCounts, open }: { agingCounts: { under15: number; days15To30: number; over30: number }; open: number }) {
+  if (open === 0) {
+    return (
+      <div className="relative flex h-32 w-32 items-center justify-center rounded-full border-8 border-slate-100 font-bold text-slate-400 text-xs">
+        0 Pending
+      </div>
+    );
+  }
+
+  const u15Pct = (agingCounts.under15 / open) * 100;
+  const d30Pct = (agingCounts.days15To30 / open) * 100;
+  const o30Pct = (agingCounts.over30 / open) * 100;
+
+  return (
+    <div className="relative flex items-center justify-center">
+      <svg className="h-36 w-36 -rotate-90 transform" viewBox="0 0 42 42">
+        <circle cx="21" cy="21" r="15.91549430918954" fill="transparent" stroke="#e2e8f0" strokeWidth="6" />
+        {/* <15 Days (Emerald) */}
+        {agingCounts.under15 > 0 && (
+          <circle
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            stroke="#10b981"
+            strokeWidth="6"
+            strokeDasharray={`${u15Pct} ${100 - u15Pct}`}
+            strokeDashoffset="0"
+          />
+        )}
+        {/* 15-30 Days (Amber) */}
+        {agingCounts.days15To30 > 0 && (
+          <circle
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            stroke="#f59e0b"
+            strokeWidth="6"
+            strokeDasharray={`${d30Pct} ${100 - d30Pct}`}
+            strokeDashoffset={-u15Pct}
+          />
+        )}
+        {/* >30 Days (Rose) */}
+        {agingCounts.over30 > 0 && (
+          <circle
+            cx="21"
+            cy="21"
+            r="15.91549430918954"
+            fill="transparent"
+            stroke="#f43f5e"
+            strokeWidth="6"
+            strokeDasharray={`${o30Pct} ${100 - o30Pct}`}
+            strokeDashoffset={-(u15Pct + d30Pct)}
+          />
+        )}
+      </svg>
+      <div className="absolute flex flex-col items-center justify-center text-center">
+        <span className="text-xl font-bold text-amber-700">{open}</span>
+        <span className="text-[10px] text-slate-500 font-medium">Pending</span>
+      </div>
     </div>
   );
 }
