@@ -156,6 +156,24 @@ export const dict = {
     en: "You can update the status, add comments and attach files for petitions in your area.",
     ta: "உங்கள் பகுதி மனுக்களுக்கு நிலையை புதுப்பிக்கவும், கருத்து சேர்க்கவும், கோப்புகளை இணைக்கவும் முடியும்.",
   },
+  searchGeography: { en: "Filter by name or code...", ta: "பெயர் அல்லது குறியீடு மூலம் தேடுக..." },
+  bulkImport: { en: "Bulk Import", ta: "மொத்த பதிவேற்றம்" },
+  downloadTemplate: { en: "Download CSV Template", ta: "மாதிரி படிவம் (CSV) பதிவிறக்கு" },
+  bulkImportTitle: {
+    en: "Bulk Import Geography (Districts, Taluks & Villages)",
+    ta: "மாவட்டங்கள், வட்டங்கள் & கிராமங்கள் மொத்த பதிவேற்றம்",
+  },
+  bulkImportHint: {
+    en: "Upload a CSV file or paste CSV rows. Header format: district_code, district_name_en, district_name_ta, taluk_name_en, taluk_name_ta, village_name_en, village_name_ta, kind",
+    ta: "CSV கோப்பை பதிவேற்றவும் அல்லது கீழே ஒட்டவும். வடிவ தலைப்பு: district_code, district_name_en, district_name_ta, taluk_name_en, taluk_name_ta, village_name_en, village_name_ta, kind",
+  },
+  csvPlaceholder: { en: "Paste CSV content here...", ta: "இங்கே CSV உரையை ஒட்டவும்..." },
+  processImport: { en: "Import Geography Records", ta: "பதிவேற்றத்தை தொடங்கு" },
+  importSuccess: {
+    en: "Successfully imported geography records!",
+    ta: "மாவட்டங்கள்/வட்டங்கள்/கிராமங்கள் வெற்றிகரமாக பதிவேற்றப்பட்டன!",
+  },
+  importing: { en: "Importing records...", ta: "பதிவேற்றப்படுகிறது..." },
 } as const;
 
 export type DictKey = keyof typeof dict;
