@@ -187,7 +187,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="space-y-6" id="dashboard-report-content">
+    <div className="space-y-6 animate-fade-in" id="dashboard-report-content">
       {/* Top Header & Actions */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
