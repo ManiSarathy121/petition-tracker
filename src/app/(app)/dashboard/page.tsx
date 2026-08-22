@@ -9,6 +9,12 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { STATUSES, type Petition, type PetitionStatus, type Profile } from "@/lib/types";
 import type { DictKey } from "@/i18n/dict";
 
+declare global {
+  interface Window {
+    html2pdf?: any;
+  }
+}
+
 interface OfficerPerformance {
   id: string;
   name: string;
@@ -143,12 +149,45 @@ export default function DashboardPage() {
   const total = Object.values(counts).reduce((a, b) => a + b, 0);
   const open = (counts.new ?? 0) + (counts.assigned ?? 0) + (counts.in_progress ?? 0);
 
-  const handlePrintPDF = () => {
-    window.print();
+  const [downloadingPDF, setDownloadingPDF] = useState(false);
+
+  const handleDownloadPDF = async () => {
+    setDownloadingPDF(true);
+    try {
+      // Load html2pdf.js dynamically if not present
+      if (!window.html2pdf) {
+        await new Promise((resolve, reject) => {
+          const script = document.createElement("script");
+          script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+          script.onload = resolve;
+          script.onerror = reject;
+          document.body.appendChild(script);
+        });
+      }
+
+      const element = document.getElementById("dashboard-report-content");
+      if (element && window.html2pdf) {
+        const opt = {
+          margin:       [8, 8, 8, 8],
+          filename:     `petition_dashboard_report_${new Date().toISOString().slice(0, 10)}.pdf`,
+          image:        { type: "jpeg", quality: 0.98 },
+          html2canvas:  { scale: 2, useCORS: true },
+          jsPDF:        { unit: "mm", format: "a4", orientation: "portrait" }
+        };
+        await window.html2pdf().set(opt).from(element).save();
+      } else {
+        window.print();
+      }
+    } catch (err) {
+      console.error("PDF Download error:", err);
+      window.print();
+    } finally {
+      setDownloadingPDF(false);
+    }
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" id="dashboard-report-content">
       {/* Top Header & Actions */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
@@ -162,11 +201,12 @@ export default function DashboardPage() {
 
         <div className="flex items-center gap-2 print:hidden">
           <button
-            onClick={handlePrintPDF}
-            className="btn-secondary flex items-center gap-2 text-xs"
+            onClick={handleDownloadPDF}
+            disabled={downloadingPDF}
+            className="btn-secondary flex items-center gap-2 text-xs border-amber-300 bg-amber-50 text-amber-900 hover:bg-amber-100"
           >
-            <span>🖨️</span>
-            <span>{t("exportPDF")}</span>
+            <span>{downloadingPDF ? "⏳" : "📄"}</span>
+            <span>{downloadingPDF ? "Downloading PDF..." : "Download PDF Report"}</span>
           </button>
           {profile.role === "admin" && (
             <Link href="/petitions/new" className="btn-primary text-xs">
