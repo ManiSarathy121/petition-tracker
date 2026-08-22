@@ -9,6 +9,7 @@ import { PRIORITIES, STATUSES } from "@/lib/types";
 import type { DictKey } from "@/i18n/dict";
 import { TamilInput } from "@/components/TamilInput";
 import { useDefaultDistrict } from "@/components/DistrictContext";
+import { PetitionScanner, type ExtractedPetitionData } from "@/components/PetitionScanner";
 
 const empty = {
   proceedings_no: "",
@@ -39,24 +40,47 @@ export default function NewPetitionPage() {
   const name = useName();
   const isAdmin = useIsAdmin();
   const master = useMasterData();
-  const { defaultDistrictId } = useDefaultDistrict();
+  const { defaultDistrictId, defaultTalukId } = useDefaultDistrict();
 
-  const [form, setForm] = useState({ ...empty, district_id: defaultDistrictId });
+  const [form, setForm] = useState({
+    ...empty,
+    district_id: defaultDistrictId,
+    taluk_id: defaultTalukId,
+  });
   const [files, setFiles] = useState<File[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [scanMessage, setScanMessage] = useState<string | null>(null);
 
-  // Sync default district if form hasn't been touched yet
+  // Sync default location preferences if form hasn't been touched yet
   useEffect(() => {
-    if (!form.district_id && defaultDistrictId) {
-      setForm((f) => ({ ...f, district_id: defaultDistrictId }));
-    }
-  }, [defaultDistrictId, form.district_id]);
+    setForm((f) => ({
+      ...f,
+      district_id: f.district_id || defaultDistrictId,
+      taluk_id: f.taluk_id || defaultTalukId,
+    }));
+  }, [defaultDistrictId, defaultTalukId]);
+
+  const handleScannerExtracted = (extracted: ExtractedPetitionData) => {
+    setForm((f) => ({
+      ...f,
+      petitioner_name: extracted.petitioner_name || f.petitioner_name,
+      petitioner_phone: extracted.petitioner_phone || f.petitioner_phone,
+      subject: extracted.subject || f.subject,
+      petitioner_address: extracted.petitioner_address || f.petitioner_address,
+      description: extracted.description || f.description,
+    }));
+    setScanMessage(t("scanSuccess"));
+    setTimeout(() => setScanMessage(null), 5000);
+  };
+
   if (!isAdmin) {
     return <p className="card p-6 text-sm text-slate-600">{t("adminOnly")}</p>;
   }
+
   const set = (k: keyof typeof empty, v: string) =>
     setForm((f) => ({ ...f, [k]: v }));
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     setBusy(true);
@@ -103,6 +127,7 @@ export default function NewPetitionPage() {
     }
     router.push(`/petitions/${data.id}`);
   };
+
   const talukOptions = master.taluks.filter(
     (x) => !form.district_id || x.district_id === form.district_id,
   );
@@ -114,14 +139,28 @@ export default function NewPetitionPage() {
       o.is_active &&
       (!form.department_id || o.department_id === form.department_id),
   );
+
   return (
     <form onSubmit={submit} className="space-y-5">
-      <div className="flex items-center justify-between">
-        <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
-          {t("newPetition")}
-        </h1>
-        <span className="text-xs text-slate-400">{t("formRef")}</span>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
+            {t("newPetition")}
+          </h1>
+          <span className="text-xs text-slate-400">{t("formRef")}</span>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <PetitionScanner onDataExtracted={handleScannerExtracted} />
+        </div>
       </div>
+
+      {scanMessage && (
+        <div className="rounded-lg bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-800 font-medium flex items-center justify-between">
+          <span>✅ {scanMessage}</span>
+          <button type="button" onClick={() => setScanMessage(null)} className="text-emerald-600 hover:text-emerald-900 font-bold">✕</button>
+        </div>
+      )}
       {/* Register entry — columns 1-4 of the book */}
       <section className="card p-5">
         <h2 className="section-title">

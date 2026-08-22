@@ -193,6 +193,12 @@ export const dict = {
     en: "Type in English phonetics (e.g. Ocheri, Nemili) to convert to Tamil",
     ta: "ஆங்கிலத்தில் தட்டச்சு செய்து தமிழில் மாற்றவும் (எ.கா. Ocheri -> ஓச்சரி, Nemili -> நெமிலி)",
   },
+  scanPetition: { en: "Scan Petition Document (Camera / PDF)", ta: "மனு ஆவணத்தை கேமரா/PDF மூலம் தானியங்கி வாசிப்பு" },
+  captureCamera: { en: "Take Photo via Camera", ta: "கேமரா மூலம் படம் எடு" },
+  uploadPDF: { en: "Upload PDF / Image File", ta: "PDF / புகைப்படக் கோப்பை பதிவேற்று" },
+  scanningDoc: { en: "Scanning & extracting petition info...", ta: "மனு விவரங்கள் படிக்கப்படுகிறது..." },
+  scanSuccess: { en: "Petition details successfully extracted and filled!", ta: "மனு விவரங்கள் வெற்றிகரமாக படிவத்தில் நிரப்பப்பட்டன!" },
+  defaultTaluk: { en: "Default Taluk Preference", ta: "முன்னிருப்பு வட்டம்" },
 } as const;
 
 export type DictKey = keyof typeof dict;
