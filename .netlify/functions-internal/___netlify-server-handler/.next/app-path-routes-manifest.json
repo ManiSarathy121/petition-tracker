@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/favicon.ico/route": "/favicon.ico",
+  "/page": "/",
+  "/login/page": "/login",
+  "/(app)/petitions/[id]/page": "/petitions/[id]",
+  "/(app)/petitions/page": "/petitions",
+  "/(app)/admin/departments/page": "/admin/departments",
+  "/(app)/admin/geography/page": "/admin/geography",
+  "/(app)/dashboard/page": "/dashboard",
+  "/(app)/petitions/new/page": "/petitions/new",
+  "/(app)/admin/users/page": "/admin/users"
+}

@@ -1,0 +1,13 @@
+{
+  "/_not-found/page": "app/_not-found/page.js",
+  "/favicon.ico/route": "app/favicon.ico/route.js",
+  "/page": "app/page.js",
+  "/login/page": "app/login/page.js",
+  "/(app)/petitions/[id]/page": "app/(app)/petitions/[id]/page.js",
+  "/(app)/petitions/page": "app/(app)/petitions/page.js",
+  "/(app)/admin/departments/page": "app/(app)/admin/departments/page.js",
+  "/(app)/admin/geography/page": "app/(app)/admin/geography/page.js",
+  "/(app)/dashboard/page": "app/(app)/dashboard/page.js",
+  "/(app)/petitions/new/page": "app/(app)/petitions/new/page.js",
+  "/(app)/admin/users/page": "app/(app)/admin/users/page.js"
+}

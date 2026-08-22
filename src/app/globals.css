@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+:root {
+  --tn-maroon: #7b1113;
+  --tn-maroon-dark: #5c0c0e;
+  --tn-gold: #c9a227;
+  --tn-ink: #1a1a1a;
+}
+
+@theme inline {
+  --color-tn: #7b1113;
+  --color-tn-dark: #5c0c0e;
+  --color-tn-gold: #c9a227;
+  --font-sans:
+    "Noto Sans", "Noto Sans Tamil", "Latha", ui-sans-serif, system-ui,
+    -apple-system, "Segoe UI", sans-serif;
+}
+
+html,
+body {
+  background: #f4f5f7;
+  color: var(--tn-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Tamil text needs a little more line height to stay legible */
+.ta {
+  line-height: 1.65;
+}
+
+.card {
+  @apply bg-white rounded-lg border border-slate-200 shadow-sm;
+}
+
+.label {
+  @apply block text-sm font-medium text-slate-700;
+}
+
+.label-sub {
+  @apply block text-[11px] font-normal text-slate-400 leading-tight;
+}
+
+.input {
+  @apply mt-1 block w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm
+         text-slate-900 shadow-sm outline-none
+         focus:border-[color:var(--tn-maroon)] focus:ring-2 focus:ring-[color:var(--tn-maroon)]/20
+         disabled:bg-slate-100 disabled:text-slate-500;
+}
+
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger {
+  @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium
+         transition-colors disabled:opacity-50 disabled:cursor-not-allowed;
+}
+
+.btn-primary {
+  @apply text-white;
+  background-color: var(--tn-maroon);
+}
+.btn-primary:hover:not(:disabled) {
+  background-color: var(--tn-maroon-dark);
+}
+
+.btn-secondary {
+  @apply border border-slate-300 bg-white text-slate-700 hover:bg-slate-50;
+}
+
+.btn-danger {
+  @apply border border-rose-300 bg-white text-rose-700 hover:bg-rose-50;
+}
+
+.badge {
+  @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset;
+}
+
+.th {
+  @apply px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500;
+}
+
+.td {
+  @apply px-3 py-3 text-sm text-slate-700 align-top;
+}
+
+.section-title {
+  @apply text-sm font-semibold text-slate-900 border-b border-slate-200 pb-2 mb-4;
+}
