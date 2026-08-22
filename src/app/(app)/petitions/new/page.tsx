@@ -11,6 +11,7 @@ import { TamilInput } from "@/components/TamilInput";
 import { useDefaultDistrict } from "@/components/DistrictContext";
 import { PetitionScanner, type ExtractedPetitionData } from "@/components/PetitionScanner";
 import { SearchableSelect } from "@/components/SearchableSelect";
+import { compressFileUnder150KB, formatKB, type CompressionResult } from "@/lib/imageCompressor";
 
 const empty = {
   proceedings_no: "",
@@ -49,6 +50,7 @@ export default function NewPetitionPage() {
     taluk_id: defaultTalukId,
   });
   const [files, setFiles] = useState<File[]>([]);
+  const [compressionStats, setCompressionStats] = useState<CompressionResult[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [scanMessage, setScanMessage] = useState<string | null>(null);
@@ -386,25 +388,44 @@ export default function NewPetitionPage() {
         <h2 className="section-title">
           <L k="attachments" />
         </h2>
-        <p className="mb-2 text-xs text-slate-500">
-          PDF / JPG / PNG · {t("optional")} · max 15 MB
+        <p className="mb-2 text-xs text-emerald-700 font-medium flex items-center gap-1">
+          <span>⚡ Auto-Compression:</span>
+          <span>All uploaded images & documents automatically compressed under 150 KB for free tier efficiency</span>
         </p>
         <input
           type="file"
           multiple
           accept="application/pdf,image/*"
-          onChange={(e) => setFiles(Array.from(e.target.files ?? []))}
+          onChange={async (e) => {
+            const rawFiles = Array.from(e.target.files ?? []);
+            const compressedResults = await Promise.all(
+              rawFiles.map((f) => compressFileUnder150KB(f))
+            );
+            setFiles(compressedResults.map((r) => r.file));
+            setCompressionStats(compressedResults);
+          }}
           className="block w-full text-sm text-slate-600 file:mr-3 file:rounded-md file:border-0
           file:bg-slate-100 file:px-3 file:py-2 file:text-sm file:font-medium
           hover:file:bg-slate-200"
         />
         {files.length > 0 && (
           <ul className="mt-2 space-y-1 text-xs text-slate-600">
-            {files.map((f) => (
-              <li key={f.name}>
-                • {f.name} ({Math.round(f.size / 1024)} KB)
-              </li>
-            ))}
+            {files.map((f, idx) => {
+              const stat = compressionStats[idx];
+              return (
+                <li key={f.name} className="flex items-center gap-2">
+                  <span className="font-medium">• {f.name}</span>
+                  <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] text-emerald-800 font-mono font-bold">
+                    {formatKB(f.size)} (Under 150 KB)
+                  </span>
+                  {stat && stat.savedPercent > 0 && (
+                    <span className="text-[10px] text-emerald-600 font-semibold">
+                      ({stat.savedPercent}% compressed from {formatKB(stat.originalSize)})
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
