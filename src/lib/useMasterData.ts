@@ -33,7 +33,7 @@ export function useMasterData(): MasterData {
         supabase.from("taluks").select("*").order("name_en"),
         supabase.from("villages").select("*").order("name_en"),
         supabase.from("departments").select("*").order("name_en"),
-        supabase.from("profiles").select("*").order("full_name"),
+        supabase.from("profiles").select("*").eq("app_name", "petition-tracker").order("full_name"),
       ]);
       if (cancelled) return;
       setDistricts((d.data as District[]) ?? []);

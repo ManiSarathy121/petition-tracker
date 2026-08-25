@@ -19,15 +19,40 @@ export default function LoginPage() {
     setBusy(true);
     setError(null);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error: authErr } = await supabase.auth.signInWithPassword({
       email: email.trim().toLowerCase(),
       password,
     });
-    if (error) {
-      setError(error.message);
+
+    if (authErr) {
+      setError(authErr.message);
       setBusy(false);
       return;
     }
+
+    if (data.user) {
+      // Check application-level profile authorization for Petition Tracker
+      const { data: prof, error: profErr } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profErr || !prof || prof.app_name !== "petition-tracker") {
+        await supabase.auth.signOut();
+        setError("Access Denied: This user account is not authorized for the Petition Tracker application.");
+        setBusy(false);
+        return;
+      }
+
+      if (!prof.is_active) {
+        await supabase.auth.signOut();
+        setError("Your account has been deactivated. Please contact an Administrator.");
+        setBusy(false);
+        return;
+      }
+    }
+
     router.push("/dashboard");
     router.refresh();
   };
