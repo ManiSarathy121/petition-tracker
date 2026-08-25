@@ -84,11 +84,53 @@ export default function UsersPage() {
     if (error) setError(error.message);
     master.reload();
   };
+  const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("");
+
+  const filteredOfficers = master.officers.filter((p) => {
+    if (roleFilter && p.role !== roleFilter) return false;
+    if (statusFilter === "active" && !p.is_active) return false;
+    if (statusFilter === "inactive" && p.is_active) return false;
+
+    if (!search.trim()) return true;
+    const q = search.toLowerCase().trim();
+    const deptName = name(master.departments.find((d) => d.id === p.department_id)) || "";
+
+    return (
+      p.full_name?.toLowerCase().includes(q) ||
+      p.full_name_ta?.toLowerCase().includes(q) ||
+      p.email?.toLowerCase().includes(q) ||
+      p.phone?.includes(q) ||
+      p.designation?.toLowerCase().includes(q) ||
+      deptName.toLowerCase().includes(q)
+    );
+  });
+
+  const totalUsers = master.officers.length;
+  const activeOfficers = master.officers.filter((o) => o.role === "officer" && o.is_active).length;
+  const admins = master.officers.filter((o) => o.role === "admin").length;
+
   return (
     <div className="space-y-5">
-      <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
-        {t("users")}
-      </h1>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <h1 className={`text-xl font-semibold ${lang === "ta" ? "ta" : ""}`}>
+          {t("users")}
+        </h1>
+        <div className="flex items-center gap-2 text-xs">
+          <span className="rounded-md bg-slate-100 px-2.5 py-1 text-slate-700 font-medium">
+            Total Users: <strong>{totalUsers}</strong>
+          </span>
+          <span className="rounded-md bg-emerald-50 text-emerald-800 border border-emerald-200 px-2.5 py-1 font-medium">
+            Active Officers: <strong>{activeOfficers}</strong>
+          </span>
+          <span className="rounded-md bg-violet-50 text-violet-800 border border-violet-200 px-2.5 py-1 font-medium">
+            Admins: <strong>{admins}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* User Creation Form */}
       <form onSubmit={create} className="card p-5">
         <h2 className="section-title">
           <L k="createUser" />
@@ -96,7 +138,7 @@ export default function UsersPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div>
             <label className="label">
-              <L k="fullName" />
+              <L k="fullName" /> <span className="text-rose-600">*</span>
             </label>
             <input
               required
@@ -119,7 +161,7 @@ export default function UsersPage() {
           </div>
           <div>
             <label className="label">
-              <L k="email" />
+              <L k="email" /> <span className="text-rose-600">*</span>
             </label>
             <input
               required
@@ -131,7 +173,7 @@ export default function UsersPage() {
           </div>
           <div>
             <label className="label">
-              <L k="password" />
+              <L k="password" /> <span className="text-rose-600">*</span>
             </label>
             <input
               required
@@ -206,73 +248,145 @@ export default function UsersPage() {
           {ok && <span className="text-sm text-emerald-600">{ok}</span>}
         </div>
       </form>
-      <div className="card overflow-x-auto">
-        <table className="w-full min-w-[820px]">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="th">{t("fullName")}</th>
-              <th className="th">{t("email")}</th>
-              <th className="th">{t("role")}</th>
-              <th className="th">{t("department")}</th>
-              <th className="th">{t("jurisdiction")}</th>
-              <th className="th">{t("status")}</th>
-              <th className="th"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {master.officers.map((p) => (
-              <tr key={p.id} className="hover:bg-slate-50">
-                <td className="td">
-                  {p.full_name}
-                  {p.designation && (
-                    <div className="text-xs text-slate-400">
-                      {p.designation}
-                    </div>
-                  )}
-                </td>
-                <td className="td text-xs">{p.email}</td>
-                <td className="td text-xs">
-                  {t(p.role === "admin" ? "role_admin" : "role_officer")}
-                </td>
-                <td className="td text-xs">
-                  {name(
-                    master.departments.find((d) => d.id === p.department_id),
-                  )}
-                </td>
-                <td className="td">
-                  <button
-                    className="text-xs text-[color:var(--tn-maroon)] hover:underline"
-                    onClick={() => setJurisdictionFor(p)}
-                  >
-                    {t("edit")}
-                  </button>
-                </td>
-                <td className="td">
-                  <button
-                    onClick={() => toggleActive(p)}
-                    className={`badge ${p.is_active ? "bg-emerald-100 text-emerald-800 ring-emerald-600/20" : "bg-slate-100 text-slate-600 ring-slate-500/20"}`}
-                  >
-                    {p.is_active ? t("active") : t("inactive")}
-                  </button>
-                </td>
-                <td className="td whitespace-nowrap text-right">
-                  <button
-                    className="mr-3 text-xs text-slate-600 hover:underline"
-                    onClick={() => resetPassword(p)}
-                  >
-                    {t("resetPassword")}
-                  </button>
-                  <button
-                    className="text-xs text-rose-600 hover:underline"
-                    onClick={() => removeUser(p)}
-                  >
-                    {t("delete")}
-                  </button>
-                </td>
+
+      {/* Users List & Search Filter */}
+      <div className="card p-4 space-y-3">
+        <div className="flex flex-col sm:flex-row gap-3 items-center justify-between border-b border-slate-100 pb-3">
+          <div className="relative flex-1 w-full">
+            <input
+              type="text"
+              className="input mt-0 pl-9"
+              placeholder="🔍 Search users by name, email, phone, designation, department..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            <svg
+              className="pointer-events-none absolute left-3 top-2.5 h-4 w-4 text-slate-400"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+            </svg>
+          </div>
+
+          <div className="flex gap-2 shrink-0 w-full sm:w-auto">
+            <select
+              className="input mt-0 text-xs py-1.5"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value)}
+            >
+              <option value="">All Roles</option>
+              <option value="officer">{t("role_officer")}</option>
+              <option value="admin">{t("role_admin")}</option>
+            </select>
+
+            <select
+              className="input mt-0 text-xs py-1.5"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="">All Status</option>
+              <option value="active">{t("active")}</option>
+              <option value="inactive">{t("inactive")}</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[820px]">
+            <thead className="bg-slate-50">
+              <tr>
+                <th className="th">{t("fullName")}</th>
+                <th className="th">{t("email")} / Phone</th>
+                <th className="th">{t("role")}</th>
+                <th className="th">{t("department")}</th>
+                <th className="th">{t("jurisdiction")}</th>
+                <th className="th">{t("status")}</th>
+                <th className="th text-right">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredOfficers.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="td text-center text-slate-400 py-6">
+                    No users found matching filter
+                  </td>
+                </tr>
+              ) : (
+                filteredOfficers.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="td">
+                      <div className="font-medium text-slate-900">{p.full_name}</div>
+                      {p.full_name_ta && (
+                        <div className="text-xs text-slate-500 ta">{p.full_name_ta}</div>
+                      )}
+                      {p.designation && (
+                        <div className="text-xs text-slate-400">{p.designation}</div>
+                      )}
+                    </td>
+                    <td className="td text-xs">
+                      <div className="font-mono text-slate-800">{p.email}</div>
+                      {p.phone && <div className="text-slate-400">📞 {p.phone}</div>}
+                    </td>
+                    <td className="td text-xs">
+                      <span
+                        className={`badge ${
+                          p.role === "admin"
+                            ? "bg-violet-100 text-violet-800 ring-violet-600/20"
+                            : "bg-sky-100 text-sky-800 ring-sky-600/20"
+                        }`}
+                      >
+                        {t(p.role === "admin" ? "role_admin" : "role_officer")}
+                      </span>
+                    </td>
+                    <td className="td text-xs">
+                      {name(
+                        master.departments.find((d) => d.id === p.department_id),
+                      ) || "—"}
+                    </td>
+                    <td className="td">
+                      <button
+                        className="text-xs text-[color:var(--tn-maroon)] hover:underline font-medium"
+                        onClick={() => setJurisdictionFor(p)}
+                      >
+                        {t("edit")}
+                      </button>
+                    </td>
+                    <td className="td">
+                      <button
+                        onClick={() => toggleActive(p)}
+                        className={`badge cursor-pointer ${
+                          p.is_active
+                            ? "bg-emerald-100 text-emerald-800 ring-emerald-600/20"
+                            : "bg-slate-100 text-slate-600 ring-slate-500/20"
+                        }`}
+                      >
+                        {p.is_active ? t("active") : t("inactive")}
+                      </button>
+                    </td>
+                    <td className="td whitespace-nowrap text-right">
+                      <button
+                        className="mr-3 text-xs text-slate-600 hover:underline"
+                        onClick={() => resetPassword(p)}
+                      >
+                        {t("resetPassword")}
+                      </button>
+                      <button
+                        className="text-xs text-rose-600 hover:underline"
+                        onClick={() => removeUser(p)}
+                      >
+                        {t("delete")}
+                      </button>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
       {jurisdictionFor && (
         <JurisdictionModal
